@@ -1,0 +1,237 @@
+// // New code
+// import { useState, useEffect } from "react";
+// import { Eye, EyeClosed, X } from "lucide-react";
+// import { useForm } from "react-hook-form";
+// import axios from "axios";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import { useNavigate } from "react-router-dom";
+
+// const AuthForm = ({ onClose }) => {
+//   const API = "http://localhost:3000";
+
+//   const [isLogin, setIsLogin] = useState(() => {
+//     return localStorage.getItem("authPage") === "signup" ? false : true;
+//   });
+//   const [showPassword, setShowPassword] = useState(false);
+//   const [forgotPassword, setForgotPassword] = useState(false);
+//   const [otpSent, setOtpSent] = useState(false);
+//   const [isloggedin, setisloggedin] = useState(false);
+//   const [resetPassword, setResetPassword] = useState(false);
+
+//   const {
+//     register,
+//     handleSubmit,
+//     watch,
+//     reset,
+//     formState: { errors },
+//   } = useForm();
+
+//   useEffect(() => {
+//     localStorage.setItem("authPage", isLogin ? "login" : "signup");
+//     reset(); // Reset form fields when switching between Login and Signup
+//   }, [isLogin, reset]);
+
+//   useEffect(() => {
+//     const storedToken = localStorage.getItem("token");
+//     if (storedToken) {
+//       setisloggedin(true);
+//     }
+//   }, []);
+
+//   const handleSendOtp = () => {
+//     if (watch("email")) {
+//       setOtpSent(true);
+//       toast.info("OTP has been sent to your email!", { position: "top-right" });
+//     }
+//   };
+
+//   const handleVerifyOtp = () => {
+//     if (watch("otp")?.length === 6) {
+//       toast.success("OTP verified! Now reset your password.", { position: "top-right" });
+//       setForgotPassword(false);
+//       setOtpSent(false);
+//       setResetPassword(true);
+//     }
+//   };
+//   // const navigate = useNavigate(); 
+//   const submitHandler = async (data) => {
+//     try {
+//       let url = `${API}/user/${isLogin ? "login" : "signup"}`;
+//       if (forgotPassword) {
+//         url = otpSent ? `${API}/user/verify` : `${API}/user/forgotpassword`;
+//       }
+
+//       const response = await axios.post(url, data);
+//       console.log(response.data);
+
+//       // Assuming the response contains a token
+//       const { token, User } = response.data;
+
+//       if (token) {
+//         localStorage.setItem("token", token); // Store the token
+//         localStorage.setItem("userEmail", User.email); // Store user email
+//         setisloggedin(true);
+//       }
+
+//       toast.success(isLogin ? "Login successful!" : "Signup successful!", { position: "top-right" });
+//       onClose();
+
+//       setTimeout(() => {
+//         window.location.reload();
+//       }, 500);
+
+//       // navigate("/")
+//     } catch (error) {
+//       toast.error(error.response?.data?.message || "An error occurred. Please try again.", { position: "top-right" });
+//     }
+//   };
+
+//   return (
+//     <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-2xl z-50">
+//       <div className="bg-black text-white p-6 rounded-xl shadow-lg w-full max-w-md relative border border-[#444]">
+//         {/* Close Button */}
+//         <button className="absolute top-3 right-3 text-gray-400 hover:text-white" onClick={onClose}>
+//           <X size={24} />
+//         </button>
+
+//         {/* Title */}
+//         <h2 className="text-2xl font-bold text-center mb-4 text-[#00A8E8]">
+//           {forgotPassword ? (otpSent ? "Enter OTP" : "Reset Password") : isLogin ? "Welcome Back!" : "Create an Account"}
+//         </h2>
+
+//         {/* Form */}
+//         <form className="space-y-4" onSubmit={handleSubmit(submitHandler)}>
+//           {/* Username (Only for Signup) */}
+//           {!isLogin && (
+//             <div>
+//               <label className="text-sm text-gray-400">Username</label>
+//               <input
+//                 type="text"
+//                 className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00A8E8] text-white"
+//                 placeholder="Enter your username"
+//                 {...register("username", { required: "Username is required", minLength: { value: 3, message: "Username must be at least 3 characters" } })}
+//               />
+//               {errors.username && <p className="text-red-500 text-base font-semibold mt-1">{errors.username.message}</p>}
+//             </div>
+//           )}
+
+//           {/* Email */}
+//           <div>
+//             <label className="text-sm text-gray-400">Email</label>
+//             <input
+//               type="email"
+//               className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00A8E8] text-white"
+//               placeholder="Enter your email"
+//               {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email" } })}
+//             />
+//             {errors.email && <p className="text-red-500 text-base font-semibold mt-1">{errors.email.message}</p>}
+//           </div>
+
+//           {/* Password (Hidden for Forgot Password) */}
+//           {!forgotPassword && (
+//             <div className="relative">
+//               <label className="text-sm text-gray-400">Password</label>
+//               <input
+//                 type={showPassword ? "text" : "password"}
+//                 className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00A8E8] text-white"
+//                 placeholder="Enter your password"
+//                 {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
+//               />
+//               <button
+//                 type="button"
+//                 className="absolute right-3 top-9 text-gray-400 hover:text-white"
+//                 onClick={() => setShowPassword(!showPassword)}
+//               >
+//                 {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
+//               </button>
+//               {errors.password && <p className="text-red-500 text-base font-semibold mt-1">{errors.password.message}</p>}
+//             </div>
+//           )}
+//           {/* Forgot Password Link */}
+//           {isLogin && !forgotPassword && (
+//             <p className="text-sm text-gray-400 text-center">
+//               <button
+//                 onClick={() => {
+//                   setForgotPassword(true);
+//                   reset();
+//                 }}
+//                 className="text-[#00A8E8] hover:underline transition-all"
+//               >
+//                 Forgot Password?
+//               </button>
+//             </p>
+//           )}
+//           {/* OTP Field (Only for Forgot Password) */}
+//           {forgotPassword && otpSent && (
+//             <div>
+//               <label className="text-sm text-gray-400">Enter OTP</label>
+//               <input
+//                 type="text"
+//                 className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00A8E8] text-white"
+//                 placeholder="Enter 6-digit OTP"
+//                 {...register("otp", { required: "OTP is required", minLength: { value: 6, message: "OTP must be 6 digits" }, maxLength: { value: 6, message: "OTP must be 6 digits" } })}
+//               />
+//               {errors.otp && <p className="text-red-500 text-base font-semibold mt-1">{errors.otp.message}</p>}
+//             </div>
+//           )}
+//           {/* reset password new password maate*/}
+//           {resetPassword && (
+//             <div>
+//               <label className="text-sm text-gray-400">New Password</label>
+//               <input
+//                 type="password"
+//                 className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00A8E8] text-white"
+//                 placeholder="Enter new password"
+//                 {...register("newPassword", { required: "New password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
+//               />
+//               {errors.newPassword && <p className="text-red-500 text-base font-semibold mt-1">{errors.newPassword.message}</p>}
+//             </div>
+//           )}
+
+//           {/* Button */}
+//           <button
+//             type={forgotPassword ? (otpSent ? (resetPassword ? "submit" : "button") : "button") : "submit"}
+//             className="w-full bg-[#00A8E8] text-black p-2 rounded-lg font-semibold shadow-md transition-all hover:bg-[#0088C0]"
+//             onClick={
+//               forgotPassword
+//                 ? otpSent
+//                   ? resetPassword
+//                     ? undefined // Let form handle submission
+//                     : handleVerifyOtp
+//                   : handleSendOtp
+//                 : undefined
+//             }
+//           >
+//             {forgotPassword ? (otpSent ? (resetPassword ? "Reset Password" : "Verify OTP") : "Send OTP") : isLogin ? "Login" : "Sign Up"}
+//           </button>
+
+//         </form>
+
+//         {/* Switch Between Login & Signup */}
+//         <p className="text-gray-400 text-sm text-center mt-4">
+//           {forgotPassword ? (
+//             <button
+//               onClick={() => { setForgotPassword(false); setOtpSent(false); reset(); }}
+//               className="text-[#00A8E8] hover:underline transition-all"
+//             >
+//               Back to Login
+//             </button>
+//           ) : (
+//             <>
+//               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+//               <button
+//                 onClick={() => setIsLogin(!isLogin)}
+//                 className="text-[#00A8E8] hover:underline transition-all"
+//               >
+//                 {isLogin ? "Sign Up" : "Login"}
+//               </button>
+//             </>
+//           )}
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AuthForm;
