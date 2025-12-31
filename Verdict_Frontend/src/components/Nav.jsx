@@ -45,7 +45,7 @@ function Nav({ onLogout }) {  // Accept onLogout function from App.jsx
                         <div className="flex items-center gap-3">
                             <span className="block text-gray-300 font-semibold">{userEmail}</span>
                             <button
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                                className="bg-red-500  text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
                                 onClick={logoutFunction}
                             >
                                 Logout
@@ -53,7 +53,7 @@ function Nav({ onLogout }) {  // Accept onLogout function from App.jsx
                         </div>
                     ) : (
                         <button
-                            className="bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-300 transition"
+                            className="bg-white cursor-pointer text-black px-6 py-2 rounded-lg hover:bg-gray-300 transition"
                             onClick={() => setShowAuthForm(true)}
                         >
                             Get Started
@@ -65,29 +65,7 @@ function Nav({ onLogout }) {  // Accept onLogout function from App.jsx
                     </button>
                 </nav>
 
-                {isOpen && (
-                    <div className="md:hidden bg-black text-white py-4 px-6 space-y-4">
-                        <a href="#" className="block">Home</a>
-                        <a href="#" className="block">Features</a>
-                        <a href="#" className="block">Services</a>
-                        <a href="#" className="block">Pricing</a>
-                        {isLoggedIn ? (
-                            <button
-                                className="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-                                onClick={logoutFunction}
-                            >
-                                Logout
-                            </button>
-                        ) : (
-                            <button
-                                className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-                                onClick={() => setShowAuthForm(true)}
-                            >
-                                Get Started
-                            </button>
-                        )}
-                    </div>
-                )}
+               
             </header>
 
             {showAuthForm && (

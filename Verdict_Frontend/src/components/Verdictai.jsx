@@ -131,22 +131,14 @@ export default function VerdictAI() {
     setUserEmail(email);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userName");
+ const handleLogout = () => {
+  localStorage.clear();
 
-    setIsLoggedIn(false);
-    setUserEmail("");
+  setTimeout(() => {
+    window.location.href = "/";
+  }, 100);
+};
 
-    toast.success("Logged out successfully!", { position: "top-right" });
-
-    // Force a UI re-render by updating state
-    window.dispatchEvent(new Event("storage"));
-
-    // Optionally, reload the page to fully reset the UI
-    window.location.reload();
-  };
 
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent("Anagh Patel")}&background=0D8ABC&color=ffffff&size=200`;
 
@@ -175,7 +167,7 @@ export default function VerdictAI() {
       </div>
 
       <div className="relative z-10 flex h-screen flex-col">
-        <header className="flex items-center justify-between p-16">
+        <header className="flex items-center justify-between p-5 pl-10 pr-10">
           <div className="flex items-center space-x-2">
             <div className="h-3 w-3 rounded-full bg-blue-500 animate-pulse"></div>
             <span className="text-2xl font-medium tracking-wider text-blue-300">Verdict.ai</span>
@@ -198,7 +190,7 @@ export default function VerdictAI() {
                 </div>
                 {/* Logout Button */}
                 <button
-                  className="w-full px-4 py-2 text-left text-silver hover:bg-gray-800"
+                  className="w-full px-4 py-2 text-left text-silver hover:bg-gray-800 cursor-pointer"
                   onClick={handleLogout}
                 >
                   Logout
@@ -206,18 +198,18 @@ export default function VerdictAI() {
               </div>
             )}
           </div>
-          {messages.length > 0 && (
+          {/* {messages.length > 0 && (
             <button
               onClick={() => setMessages([])}
               className="rounded-full bg-gray-900/50 p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
-          )}
+          )} */}
         </header>
 
         {/* Messages */}
-        <div className="flex-1 flex flex-col justify-end overflow-hidden px-4 pb-24 pt-10">
+        <div className="flex-1 flex flex-col justify-end overflow-hidden px-4 pb-24 pt-10 pl-10 pr-10">
           <div className="space-y-6 overflow-y-auto">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
@@ -250,7 +242,7 @@ export default function VerdictAI() {
               className="w-full bg-gray-900 text-white p-4 rounded-2xl"
               placeholder="Type your query..."
             />
-            <button type="submit" className="h-14 w-14 bg-blue-600 rounded-full text-white flex justify-center items-center">
+            <button type="submit" className="cursor-pointer h-14 w-14 bg-blue-600 rounded-full text-white flex justify-center items-center">
               <ArrowRight />
             </button>
           </form>

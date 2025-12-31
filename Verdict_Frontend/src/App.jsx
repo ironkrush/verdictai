@@ -1,79 +1,64 @@
-import { useEffect, useState, useRef } from 'react';
-import Nav from './components/Nav';
-import Scroll from './components/Scroll';
-import Footer from './components/Footer';
-import Features from './components/Features';
-import Bento from './components/Bento';
-import Faq from './components/Faq';
-import Partical from './components/Partical';
-import VerdictAI from './components/Verdictai';
-import Pricing from './components/Pricing';
+import { useEffect, useState } from "react";
+import VerdictAI from "./components/Verdictai";
+import Nav from "./components/Nav";
+import Scroll from "./components/Scroll";
+import Features from "./components/Features";
+import Bento from "./components/Bento";
+import Pricing from "./components/Pricing";
+import Faq from "./components/Faq";
+import Footer from "./components/Footer"
+import Partical from "./components/Partical";
 
 function App() {
-  // Refs for each section
-  const homeRef = useRef(null);
-  const featuresRef = useRef(null);
-  const servicesRef = useRef(null);
-  const pricingRef = useRef(null);
-  const faqRef = useRef(null);
-  const verdictRef = useRef(null);
-
-  // State to track authentication
   const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loading, setLoading] = useState(false);
 
-  // Listen for authentication changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setToken(localStorage.getItem("token"));
-    };
+  // 🔹 login handler (call this after successful login)
+  const handleLogin = (token) => {
+    setLoading(true);
+    localStorage.setItem("token", token);
 
-    window.addEventListener("storage", handleStorageChange);
+    setTimeout(() => {
+      setToken(token);
+      setLoading(false);
+    }, 1000); // small delay for smooth UX
+  };
 
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [token]);
+  // 🔹 logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+  };
+
+  // -----------------------
+  // LOADING SCREEN
+  // -----------------------
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-black text-white text-2xl">
+        Loading...
+      </div>
+    );
+  }
+
+  if (token) {
+    return (
+      <div className="bg-black min-h-screen text-white">
+        <VerdictAI />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-black text-white min-h-screen">
-      {/* Show Navbar only if not logged in */}
-      {!token && (
-        <Nav
-          homeRef={homeRef}
-          featuresRef={featuresRef}
-          servicesRef={servicesRef}
-          pricingRef={pricingRef}
-          faqRef={faqRef}
-        />
-      )}
-
-      {/* Verdict AI Section (Always Visible) */}
-      <div ref={verdictRef}>
-        <VerdictAI />
-      </div>
-
-      {/* Show other sections only if not logged in */}
-      {!token && (
-        <>
-          <div ref={homeRef}>
-            <Scroll />
-          </div>
-          <Partical />
-          <div ref={featuresRef}>
-            <Features />
-          </div>
-          <div ref={servicesRef}>
-            <Bento />
-          </div>
-          <div ref={pricingRef}>
-            <Pricing />
-          </div>
-          <div ref={faqRef}>
-            <Faq />
-          </div>
-          <Footer />
-        </>
-      )}
+      <Nav />
+      <Scroll />
+      <Partical />
+      <Features />
+      <Bento />
+      <Pricing />
+      <Faq />
+      <Footer></Footer>
     </div>
   );
 }

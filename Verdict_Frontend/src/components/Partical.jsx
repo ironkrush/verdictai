@@ -1,87 +1,88 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
-function useMousePosition() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (event) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  return mousePosition;
-}
-
-function hexToRgb(hex) {
-  hex = hex.replace("#", "");
-  if (hex.length === 3) {
-    hex = hex.split("").map((char) => char + char).join("");
-  }
-  const hexInt = parseInt(hex, 16);
-  return [(hexInt >> 16) & 255, (hexInt >> 8) & 255, hexInt & 255];
-}
-
-const Particles = ({ className = "", quantity =100, ease = 0, color = "#ffffff" }) => {
+const Particles = ({
+  quantity = 60,
+  color = "#ffffff",
+  className = "",
+}) => {
   const canvasRef = useRef(null);
-  const circles = useRef([]);
-  const mousePosition = useMousePosition();
-  const dpr = window.devicePixelRatio || 1;
+  const particles = useRef([]);
+  const mouse = useRef({ x: 0, y: 0 });
+
+  const hexToRgb = (hex) => {
+    const clean = hex.replace("#", "");
+    const bigint = parseInt(clean.length === 3
+      ? clean.split("").map(c => c + c).join("")
+      : clean, 16);
+
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255,
+    };
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    const resizeCanvas = () => {
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+
+    const resize = () => {
       canvas.width = canvas.offsetWidth * dpr;
       canvas.height = canvas.offsetHeight * dpr;
-      context.scale(dpr, dpr);
-      createParticles();
+      ctx.scale(dpr, dpr);
     };
 
-    const createParticles = () => {
-      circles.current = Array.from({ length: quantity }).map(() => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2 + 0.4,
-        alpha: Math.random() * 0.6 + 0.1,
-        dx: (Math.random() - 0.5) * 0.1,
-        dy: (Math.random() - 0.5) * 0.1,
-      }));
-    };
+    resize();
+    window.addEventListener("resize", resize);
 
-    const drawParticles = () => {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      const rgb = hexToRgb(color);
-      circles.current.forEach((circle) => {
-        context.beginPath();
-        context.arc(circle.x, circle.y, circle.size, 0, 2 * Math.PI);
-        context.fillStyle = `rgba(${rgb.join(", ")}, ${circle.alpha})`;
-        context.fill();
-        circle.x += circle.dx;
-        circle.y += circle.dy;
+    const rgb = hexToRgb(color);
+
+    // Create particles
+    particles.current = Array.from({ length: quantity }, () => ({
+      x: Math.random() * canvas.offsetWidth,
+      y: Math.random() * canvas.offsetHeight,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      size: Math.random() * 1.8 + 0.5,
+      alpha: Math.random() * 0.6 + 0.2,
+    }));
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.current.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap edges
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${p.alpha})`;
+        ctx.fill();
       });
-      requestAnimationFrame(drawParticles);
+
+      requestAnimationFrame(animate);
     };
 
-    resizeCanvas();
-    drawParticles();
-    window.addEventListener("resize", resizeCanvas);
-    return () => window.removeEventListener("resize", resizeCanvas);
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+    };
   }, [color, quantity]);
 
-  return <canvas ref={canvasRef} className={`absolute inset-0 ${className}`} />;
-};
-
-const Partical = () => {
-  const [color, setColor] = useState("#FFFFFF ");
-
   return (
-   
-      <Particles className="absolute inset-0 h-screen w-full" quantity={140} ease={10} color={color} />
- 
+    <canvas
+      ref={canvasRef}
+      className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
+    />
   );
 };
 
-export default Partical;
+export default Particles;

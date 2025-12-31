@@ -2,8 +2,11 @@ import { useState, useEffect } from "react"
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, KeyRound, CheckCircle } from "lucide-react"
 import axios from "axios"
 import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router-dom";
 
-export default function AuthComponent() {
+
+
+export default function AuthComponent({ onClose }) {
   const [view, setView] = useState("login")
   const [forgotPasswordStep, setForgotPasswordStep] = useState(1)
   const [formData, setFormData] = useState({
@@ -20,11 +23,18 @@ export default function AuthComponent() {
   const [isloggedin, setisloggedin] = useState(false);
   const [text, settext] = useState("Sign in")
   const { register, handleSubmit, reset } = useForm();
+
   // Reset error and success messages when view changes
   useEffect(() => {
     setError("")
     setSuccess("")
   }, [view, forgotPasswordStep])
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      onClose();
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -61,7 +71,7 @@ export default function AuthComponent() {
     try {
       settext("Signing...!")
       const response = await axios.post(`${API}/login`, data);
-      console.log(response.data);
+      console.log("response ->>", response.data);
 
       const { token, user } = response.data;
 
@@ -75,12 +85,8 @@ export default function AuthComponent() {
       }
 
       setSuccess("Login successful!");
-
-      // Clear success message after 2s
-      setTimeout(() =>
-        setSuccess("")
-        // navigate("/")
-        , 2000);
+      onClose();
+     window.location.reload()
 
     } catch (error) {
       console.error("Error => ", error);
@@ -245,15 +251,22 @@ export default function AuthComponent() {
 
   return (
 
-    <div className="w-full max-w-md relative">
+    <div className="w-full max-w-md relative flex flex-col justify-center gap-5">
       {/* Card with silver gradient border */}
+      <button className="w-full flex justify-center items-center group " onClick={onClose}>
+        <div className="h-10 w-10 border border-neutral-300 flex items-center justify-center rounded-[50%] 
+                  transition cursor-pointer group-hover:scale-105">
+          ✕
+        </div>
+      </button>
+
       <div className="relative rounded-xl overflow-hidden p-[1px] bg-gradient-to-r from-zinc-400/20 via-white/40 to-zinc-400/20 shadow-2xl">
         <div className="bg-black rounded-xl p-8 backdrop-blur-xl">
           {/* Back button */}
           {(view !== "login" || (view === "forgot-password" && forgotPasswordStep > 1)) && (
             <button
               onClick={resetView}
-              className="absolute top-4 left-4 text-zinc-400 hover:text-white transition-colors"
+              className="absolute top-4 left-4 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               aria-label="Go back"
             >
               <ArrowLeft size={20} />
@@ -330,7 +343,7 @@ export default function AuthComponent() {
                   <button
                     type="button"
                     onClick={() => setView("forgot-password")}
-                    className="text-sm text-zinc-400 hover:text-white transition-colors"
+                    className="text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     Forgot password?
                   </button>
@@ -354,14 +367,14 @@ export default function AuthComponent() {
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-white transition-colors"
                     onClick={() => togglePasswordVisibility("showPassword")}
                   >
-                    {formData.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {formData.showPassword ? <EyeOff className="cursor-pointer" size={18} /> : <Eye className="cursor-pointer" size={18} />}
                   </button>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 px-4 mt-6 bg-gradient-to-r from-zinc-200 to-white text-black font-medium rounded-md hover:from-white hover:to-zinc-200 transition-all duration-300 shadow-lg shadow-white/10 transform hover:-translate-y-0.5"
+                className="w-full py-3 px-4 mt-6 cursor-pointer bg-gradient-to-r from-zinc-200 to-white text-black font-medium rounded-md hover:from-white hover:to-zinc-200 transition-all duration-300 shadow-lg shadow-white/10 transform hover:-translate-y-0.5"
               >
                 {text}
               </button>
@@ -372,7 +385,7 @@ export default function AuthComponent() {
                   <button
                     type="button"
                     onClick={() => setView("signup")}
-                    className="text-white hover:text-zinc-200 font-medium transition-colors"
+                    className="text-white hover:text-zinc-200 font-medium transition-colors cursor-pointer"
                   >
                     Sign up
                   </button>
@@ -449,14 +462,14 @@ export default function AuthComponent() {
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-white transition-colors"
                     onClick={() => togglePasswordVisibility("showPassword")}
                   >
-                    {formData.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {formData.showPassword ? <EyeOff className="cursor-pointer" size={18} /> : <Eye className="cursor-pointer" size={18} />}
                   </button>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 px-4 mt-6 bg-gradient-to-r from-zinc-200 to-white text-black font-medium rounded-md hover:from-white hover:to-zinc-200 transition-all duration-300 shadow-lg shadow-white/10 transform hover:-translate-y-0.5"
+                className="cursor-pointer w-full py-3 px-4 mt-6 bg-gradient-to-r from-zinc-200 to-white text-black font-medium rounded-md hover:from-white hover:to-zinc-200 transition-all duration-300 shadow-lg shadow-white/10 transform hover:-translate-y-0.5"
               >
                 Create Account
               </button>
@@ -467,7 +480,7 @@ export default function AuthComponent() {
                   <button
                     type="button"
                     onClick={() => setView("login")}
-                    className="text-white hover:text-zinc-200 font-medium transition-colors"
+                    className="text-white hover:text-zinc-200 font-medium transition-colors cursor-pointer"
                   >
                     Sign in
                   </button>
@@ -568,7 +581,7 @@ export default function AuthComponent() {
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-white transition-colors"
                         onClick={() => togglePasswordVisibility("showPassword")}
                       >
-                        {formData.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {formData.showPassword ? <EyeOff className="cursor-pointer" size={18} /> : <Eye className="cursor-pointer" size={18} />}
                       </button>
                     </div>
                   </div>

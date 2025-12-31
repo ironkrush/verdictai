@@ -1,13 +1,22 @@
-const mongoose = require("mongoose"); // Corrected spelling of "mongoose"
-// const uri = "mongodb+srv://VerdictAI:4BRIOlCSsOvvMs9z@cluster0.xcyh1.mongodb.net/VerdictAI";
-const uri = "mongodb+srv://anagh0106:nMYDSCNmmp89XBRr@cluster0.bnc2r.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+const mongoose = require("mongoose");
+
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error("MONGODB_URI is not defined in environment variables");
+}
+
 const dbConnection = async () => {
-    try {
-        await mongoose.connect(uri);
-        console.log("Database Connection Established Successfully!");
-    } catch (err) {
-        console.error("Database Connection Error:", err);
-    }
+  try {
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ Database Connected Successfully");
+  } catch (err) {
+    console.error("❌ Database Connection Error:", err.message);
+    process.exit(1);
+  }
 };
 
 module.exports = { dbConnection };
